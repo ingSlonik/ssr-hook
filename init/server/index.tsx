@@ -11,10 +11,10 @@ import App from "../src/App";
 import { SiteMap } from "../types";
 
 
-const PORT = 1020;
+const PORT = 1200;
 const ORIGIN = `http://localhost:${PORT}`;
 
-const INDEX_HTML_PATH = resolve("..", "src", "index.html");
+const INDEX_HTML_PATH = resolve("..", "dist", "index.html");
 
 
 const app = express();
@@ -71,7 +71,7 @@ app.get("/sitemap.xml", async (_, res) => {
 // --------------------------------- API ---------------------------------------
 app.use(express.json({ limit: "1MB" }));
 
-// just example of an endpoint
+// just example of endpoints
 const items: Item[] = [{
     id: "item1",
     title: "Item1",
@@ -83,13 +83,13 @@ const items: Item[] = [{
 }];
 
 app.get("/api/items", async (req, res) => {
-    return items;
+    res.status(200).json(items);
 });
 app.get("/api/item/:id", async (req, res) => {
     const item = items.find(i => i.id === req.params.id);
     if (!item) return res.status(404).json({ message: "Item not found" });
 
-    return res.status(200).json(item);
+    res.status(200).json(item);
 });
 
 

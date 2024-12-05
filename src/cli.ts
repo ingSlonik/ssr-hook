@@ -63,12 +63,13 @@ $ cd ${nameSlug}
 
 Run development server:
 $ npm run dev
+Open http://localhost:1234 in your browser.
 
 Build project:
 $ npm run build
 
 Run production server:
-$ npm run start
+$ npm start
 
 
 Tell your developer friends about RRS-hook ;)

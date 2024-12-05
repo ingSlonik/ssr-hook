@@ -7,6 +7,7 @@ Project created with `ssr-hook`.
 ```
 $ npm run dev
 ```
+Open http://localhost:1234 in your browser. 
 
 ## Build project
 

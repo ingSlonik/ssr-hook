@@ -1,5 +1,4 @@
 import { Link, useTitle } from "easy-page-router/react";
-
 import { useHeaders, useSSRHook } from "ssr-hook";
 
 export default function Items() {
@@ -9,7 +8,7 @@ export default function Items() {
     useTitle(title);
     useHeaders({
         title,
-        description: "Home page of SSR-hook | SSR-hook",
+        description: "Home page of SSR-hook | __NAME__",
         image: window.location.origin + "/logo.png",
         canonical: window.location.origin + window.location.pathname,
     });
