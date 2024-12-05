@@ -1,4 +1,6 @@
-![SSR hook logo](./images/ssr-hook.png)
+<center>
+    <img alt="SSR hook logo" src="./images/ssr-hook.png" style="height: 220px" />
+</center>
 
 # SSR hook - Server-Site Rendering hook for React
 
