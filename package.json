@@ -1,0 +1,45 @@
+{
+  "name": "ssr-hook",
+  "version": "0.1.0",
+  "description": "Server-Side Rendering hook for your React projects.",
+  "main": "client.js",
+  "types": "client.d.ts",
+  "bin": {
+    "ssr-hook": "./cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "cli": "tsc && node cli.js"
+  },
+  "keywords": [
+    "easy&lite",
+    "ssr",
+    "Server-Side Rendering",
+    "react",
+    "hook",
+    "server",
+    "client",
+    "TypeScript"
+  ],
+  "author": "Filip Paulů <ing.fenix@seznam.cz>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ingSlonik/ssr-hook.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ingSlonik/ssr-hook/issues"
+  },
+  "dependencies": {
+    "react": "x.x.x",
+    "react-dom": "x.x.x",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.13",
+    "@types/react-dom": "^18.3.1",
+    "@types/yargs": "^17.0.33",
+    "typescript": "^5.7.2"
+  }
+}

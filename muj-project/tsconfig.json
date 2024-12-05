@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "strictNullChecks": true,
+        "jsx": "react-jsx",
+        "esModuleInterop": true,
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

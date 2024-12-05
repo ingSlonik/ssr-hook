@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "dom",
+            "es2021"
+        ],
+        "strictNullChecks": true,
+        "jsx": "react-jsx",
+        "esModuleInterop": true,
+        "declaration": true,
+        "outDir": "",
+    },
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
