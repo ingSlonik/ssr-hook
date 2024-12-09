@@ -14,7 +14,7 @@ import { SiteMap } from "../types";
 const PORT = 1200;
 const ORIGIN = `http://localhost:${PORT}`;
 
-const INDEX_HTML_PATH = resolve("..", "dist", "index.html");
+const INDEX_HTML_PATH = resolve(__dirname, "..", "dist", "index.html");
 
 
 const app = express();
@@ -38,7 +38,10 @@ app.get(["/", "/index.html"], async (req, res) => {
     }
 });
 
+// get builded files
 app.use(express.static("dist"));
+// get public files
+app.use(express.static("public"));
 
 // --------------------------------- SEO ---------------------------------------
 app.get("/robots.txt", (_, res) => {
