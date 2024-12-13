@@ -1,7 +1,7 @@
 export type SiteMap = {
     url: string;
     lastModified: string;
-    changeFrequency?: string;
+    changeFrequency?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
     priority: number;
 };
 
