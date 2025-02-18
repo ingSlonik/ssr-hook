@@ -8,7 +8,7 @@ import { renderToHTML } from "ssr-hook/server";
 
 import App from "../src/App";
 
-import { SiteMap } from "../types";
+import { SiteMap, Item } from "../types";
 
 
 const PORT = 1200;
@@ -72,7 +72,7 @@ app.get("/sitemap.xml", async (_, res) => {
 
 
 // --------------------------------- API ---------------------------------------
-app.use(express.json({ limit: "1MB" }));
+app.use(express.json({ limit: "0.2MB" }));
 
 // just example of endpoints
 const items: Item[] = [{
