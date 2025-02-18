@@ -1,6 +1,6 @@
 {
   "name": "ssr-hook",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Server-Side Rendering hook for your React projects.",
   "main": "client.js",
   "types": "client.d.ts",
