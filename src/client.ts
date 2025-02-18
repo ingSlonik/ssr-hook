@@ -10,11 +10,12 @@ export function setSSROrigin(url: string) {
 export function useHeaders(headers: Partial<RenderingHeaders>) {
     for (const [key, value] of Object.entries(headers)) {
         setRenderingHeader(key as keyof RenderingHeaders, value);
-
-        if (key === "title" && window && window.document) {
-            window.document.title = value;
-        }
     }
+
+    useEffect(() => {
+        if (headers.title)
+            document.title = headers.title;
+    }, [headers.title]);
 }
 
 type UseSSRHook<T> =

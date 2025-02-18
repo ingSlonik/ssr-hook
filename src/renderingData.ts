@@ -5,10 +5,11 @@ export type RenderingData = {
     };
 };
 export type RenderingHeaders = {
-    title: string;
-    description: string;
-    image: string;
-    canonical: string;
+    title: string,
+    description: string,
+    image: string,
+    canonical: string,
+    lang: string,
 };
 
 type WindowFake = {
