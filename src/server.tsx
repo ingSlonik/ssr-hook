@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { renderToString, renderToStaticMarkup } from "react-dom/server";
+import { renderToString } from "react-dom/server";
 
 import {
     mockLocation,
@@ -7,80 +7,113 @@ import {
     getRenderingHeaders,
     getRenderingData,
     setRenderingData,
-    setRenderingValueToData
+    setRenderingValueToData,
+
+    RenderingData,
+    RenderingHeaders
 } from "./renderingData";
 
-export async function render(origin: string, url: string, app: ReactNode): Promise<{ headers: string, root: string, renderingData: string }> {
+export type RenderingResult = {
+    headers: string,
+    root: string,
+    data: string,
+    lang?: string,
+}
+
+export async function render(origin: string, url: string, app: ReactNode): Promise<RenderingResult> {
     const timeStart = new Date().getTime();
 
-    cleanRenderingData();
-    mockLocation(origin + url);
-    renderToStaticMarkup(app);
+    let i = 0;
+    let root = "";
+    let renderingData: RenderingData = {};
+    let renderingHeaders: Partial<RenderingHeaders> = {};
 
-    const timeFirstRender = new Date().getTime();
+    do {
+        i++;
 
-    const data = getRenderingData();
+        for (const [url, value] of Object.entries(renderingData)) {
+            if (value !== null) continue;
 
-    for (const url of Object.keys(data)) {
-        try {
-            const response = await fetch(url.startsWith("/") ? origin + url : url);
-            if (response.status !== 200) throw new Error(`Response status: ${response.status}`);
-            const value = await response.json();
-            setRenderingValueToData(data, url, value);
-        } catch (e) {
-            if (e instanceof Error) {
-                setRenderingValueToData(data, url, e);
-            } else {
-                setRenderingValueToData(data, url, new Error("Unknown error"));
+            try {
+                const response = await fetch(url.startsWith("/") ? origin + url : url);
+                if (response.status !== 200) throw new Error(`Response status: ${response.status}`);
+                const value = await response.json();
+                setRenderingValueToData(renderingData, url, value);
+            } catch (e) {
+                if (e instanceof Error) {
+                    setRenderingValueToData(renderingData, url, e);
+                } else {
+                    setRenderingValueToData(renderingData, url, new Error("Unknown error"));
+                }
             }
         }
-    }
 
-    const timeFetchData = new Date().getTime();
+        // End await zone. The rendering can be run different render and rewrite rendering data.
 
-    // End await zone. The rendering can be run different render and rewrite rendering data.
+        cleanRenderingData();
+        mockLocation(origin + url);
+        setRenderingData(renderingData);
 
-    cleanRenderingData();
-    mockLocation(origin + url);
-    setRenderingData(data);
+        root = renderToString(app);
+        renderingHeaders = getRenderingHeaders();
 
-    const root = renderToString(app);
-    const head = getRenderingHeaders();
-    const renderingData = `<script type="text/javascript">window.RENDERING_DATA=${JSON.stringify(data)};</script>`;
+        renderingData = getRenderingData();
+
+    } while (Object.values(renderingData).includes(null));
+    // there is not more data to get
+
+    const data = `<script type="text/javascript">window.RENDERING_DATA=${JSON.stringify(renderingData)};</script>`;
 
     const headers = renderToString(<>
-        {head.title && <title>{head.title}</title>}
-        {head.description && <meta name="description" content={head.description} />}
+        {renderingHeaders.title && <title>{renderingHeaders.title}</title>}
+        {renderingHeaders.description && <meta name="description" content={renderingHeaders.description} />}
 
-        {head.title && <meta property="og:title" content={head.title} />}
-        {head.description && <meta property="og:description" content={head.description} />}
-        {head.image && <meta property="og:image" content={head.image} />}
-        {head.canonical && <meta property="og:url" content={head.canonical} />}
+        {renderingHeaders.title && <meta property="og:title" content={renderingHeaders.title} />}
+        {renderingHeaders.description && <meta property="og:description" content={renderingHeaders.description} />}
+        {renderingHeaders.image && <meta property="og:image" content={renderingHeaders.image} />}
+        {renderingHeaders.canonical && <meta property="og:url" content={renderingHeaders.canonical} />}
 
-        {head.canonical && <link rel="canonical" href={head.canonical} />}
+        {renderingHeaders.canonical && <link rel="canonical" href={renderingHeaders.canonical} />}
     </>);
 
     const timeEnd = new Date().getTime();
-
-    const timeDiffFirstRender = timeFirstRender - timeStart;
-    const timeDiffFetchData = timeFetchData - timeFirstRender;
-    const timeDiffFinalRender = timeEnd - timeFetchData;
     const timeDiff = timeEnd - timeStart;
-    console.log(
-        "SSR:", timeDiff, "ms", url,
-        "(first render:", timeDiffFirstRender, "ms, fetch data:", timeDiffFetchData,
-        "ms, final render:", timeDiffFinalRender, "ms)",
-        Object.keys(data),
-    );
-    if (!head.title) console.warn("Warning: No title in", url);
 
-    return { headers, root, renderingData };
+    console.log("SSR:", timeDiff, "ms", "Rendering (data loop):", i, "x", url, Object.keys(renderingData));
+
+    if (!renderingHeaders.title) console.warn("Warning: No title in", url);
+
+    return { headers, root, data, lang: renderingHeaders.lang };
 }
 
 export async function renderToHTML(origin: string, url: string, indexHtml: string, app: ReactNode): Promise<string> {
-    const { headers, root, renderingData } = await render(origin, url, app);
+    const { headers, root, data, lang } = await render(origin, url, app);
+
+    if (lang)
+        indexHtml = getHtmlWithLang(indexHtml, lang);
 
     return indexHtml
         .replace("<head>", `<head>${headers}`)
-        .replace("<div id=\"root\"></div>", `<div id="root">${root}</div>${renderingData}`);
+        .replace("<div id=\"root\"></div>", `<div id="root">${root}</div>${data}`);
+}
+
+function getHtmlWithLang(html: string, lang: string) {
+
+    const htmlLang = html.indexOf(` lang="`);
+    if (htmlLang > -1) {
+        const htmlLangEnd = html.indexOf(`"`, htmlLang + 7);
+        return html.slice(0, htmlLang + 7) + lang + html.slice(htmlLangEnd);
+    }
+
+    const htmlTag = html.indexOf(`<html`);
+    if (htmlTag > -1) {
+        return html.slice(0, htmlTag + 5) + ` lang="${lang}"` + html.slice(htmlTag + 5);
+    }
+
+    const htmlDoctype = html.indexOf(`<!doctype html>`);
+    if (htmlDoctype > -1) {
+        return html.slice(0, htmlDoctype + 15) + `<html lang="${lang}">` + html.slice(htmlDoctype + 15) + `</html>`;
+    }
+
+    return `<!doctype html><html lang="${lang}">${html}</html>`;
 }
